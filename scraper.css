@@ -1,0 +1,18 @@
+h3 {
+	margin-block-end: 0.5em;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+table, td, th {
+  border: 1px solid black;
+}
+
+th, td {
+	padding: 7px;
+	text-align: center;
+}
+
+tr:nth-child(even) {background-color: #f2f2f2;}

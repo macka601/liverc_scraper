@@ -1,0 +1,122 @@
+<html>
+	<!-- Latest compiled and minified CSS -->
+	<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet">
+	<!-- jQuery library -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js">
+	</script>
+	<!-- Latest compiled JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js">
+	</script>
+	<script type="text/javascript">
+	var index = 1;
+	</script>
+	<body>
+		<div class="container">
+			<div class="row">
+				<h2>
+				Enter live rc results page to allocate points
+				</h2>
+			</div>
+			<div class="row">
+				<form action="scrap_results.php" method="POST">
+					<div class="col-sm-3">
+						<div class="form-group row">
+							<div class="col-sm">
+								<label for="pointsFirst">
+									1st place points
+								</label>
+								<input class="form-control" id="pointsFirst" name="pointsFirst" placeholder="18" type="text" value="18">
+								</input>
+							</div>
+						</div>
+						<div class="form-group row">
+							<div class="col-sm">
+								<label for="pointsFirst">
+									2nd place points
+								</label>
+								<input class="form-control" id="pointsSecond" name="pointsSecond" placeholder="17" type="text" value="17">
+								</input>
+							</div>
+						</div>
+						<div class="form-group row">
+							<div class="col-sm">
+								<label for="pointsFirst">
+									3rd place points
+								</label>
+								<input class="form-control" id="pointsThird" name="pointsThird" placeholder="15" type="text" value="15">
+								</input>
+							</div>
+						</div>
+						<div class="form-group row">
+							<div class="form-check">
+								<input class="form-check-input" id="topQualifier" name="topQualifier" type="checkbox">
+								<label class="form-check-label" for="topQualifier">
+									Extra point for top qualifier
+								</label>
+								</input>
+							</div>
+							<!--                             <div class="form-group">
+										<button class="btn btn-primary" onclick="addPointsPage()" type="button">
+										Add another points page
+										</button>
+							</div> -->
+							<div class="form-group">
+								<button class="btn btn-primary" type="submit">
+								Calculate points
+								</button>
+							</div>
+						</div>
+					</div>
+					<div class="col-sm-8" id="pointsInputs">
+						<div class="form-group row">
+							<div class="col-sm-7">
+								<label for="resultsPage">
+									liveRC points page link
+								</label>
+							</div>
+						</div>
+						<div class="form-group row">
+							<div class="col-sm-9">
+								<input class="form-control" id="resultsPage" name="resultsPage" type="text">
+								</input>
+							</div>
+							<div class="col-sm-3">
+								<button class="btn btn-primary" onclick="fetchEvents()" type="button">
+								Fetch Events
+								</button>
+							</div>
+						</div>
+						<div class="form-group row">
+							<div class="col-sm-12" id="events">
+							</div>
+						</div>
+					</div>
+					<!-- <div class="col-sm-3"> -->
+					<!-- 								<button type="button" class="btn btn-primary" onclick="fetchEvents()">
+					Fetch Events
+					</button>
+					-->
+					<!--<label for="resultsPageName">
+														Result name
+										</label>
+										<input class="form-control" id="resultsPageName" name="resultsPageName[]" type="text">
+					</input> -->
+					<!-- </div> -->
+				</div>
+			</form>
+		</div>
+	</body>
+</link>
+</html>
+<script type="text/javascript">
+function fetchEvents() {
+			var xmlhttp = new XMLHttpRequest();
+			xmlhttp.onreadystatechange = function() {
+				if (this.readyState == 4 && this.status == 200) {
+					document.getElementById("events").innerHTML = this.responseText;
+				}
+			};
+			xmlhttp.open("GET", "getEvents.php?url=" + document.getElementById('resultsPage').value, true);
+			xmlhttp.send();
+	};
+</script>
