@@ -1,5 +1,4 @@
 
-
 <?php
 // Use the simple dom html parser
 include 'simple_html_dom.php';
@@ -19,12 +18,24 @@ class RaceDebug
 class RaceClass
 {
   private $name    = '';
-  private $drivers = array();
+  private $date    = '';
   private $events;
+  private $fixDblWhiteSpace = false;
 
-  public function __construct($name)
+  public function __construct($name, $date)
   {
     $this->name = $name;
+    $this->date = $date;
+  }
+
+  public function dblWhiteSpaceFixToggle($state) {
+    $this->fixDblWhiteSpace = $state;
+  }
+
+  private function fixDoubleWhiteSpace ($name) {
+    if ($this->fixDblWhiteSpace) {
+      return preg_replace('/\s\s+/', ' ', $name);
+    }
   }
 
   public function name()
@@ -32,29 +43,30 @@ class RaceClass
     return $this->name;
   }
 
-  public function add($eventName, $driverName, $driverPoints)
-  {
-    if (!$this->events[$eventName]) {
-      $this->events[$eventName] = array();
-    }
+  public function getDate() {
+    return $this->date;
+  }
 
-    $this->events[$eventName][$driverName] = $driverPoints;
-    if (!in_array($driverName, $this->drivers)) {
-      array_push($this->drivers, $driverName);
-    }
+  public function add($driverName, $driverPoints)
+  {   
+    /* sometimes our names might have 2 spaces, which can screw up results */
+    $driverName = $this->fixDoubleWhiteSpace($driverName); 
+
+    /* Add this driver to the drivers list of this event */
+    $this->events[$this->date][$driverName] = $driverPoints;
   }
 
   public function update($raceClass)
   {
-    $this->drivers                         = array_unique(array_merge($this->drivers, $raceClass->drivers));
     $this->events[key($raceClass->events)] = $raceClass->events[key($raceClass->events)];
-  }
+  } 
 
   public function getDriverResults($name)
   {
     RaceDebug::debug(0, "Getting results for $name");
     $result = array();
     $total  = 0;
+    
     foreach ($this->events as $key => $value) {
       if (array_key_exists($name, $value)) {
         $result[$key] = $value[$name];
@@ -63,7 +75,9 @@ class RaceClass
         $result[$key] = " - ";
       }
     }
+
     $result['total'] = $total;
+
     return $result;
   }
 
@@ -78,8 +92,16 @@ class RaceClass
   }
 
   public function getAllDrivers()
-  {
-    return $this->drivers;
+  { 
+    $allDrivers = array();
+    foreach ($this->events as $event => $driversInTheEvent) {
+      foreach ($driversInTheEvent as $driver => $name) {
+        if (!in_array($driver, $allDrivers)) {
+          $allDrivers[$name] = $driver;
+        }
+      }
+    }
+    return $allDrivers;
   }
 };
 
@@ -90,21 +112,28 @@ function parseLinkForClasses($html)
   $pointsThird  = $_POST['pointsThird'];
   $topQualifier = isset($_POST['topQualifier']);
 
+  /* Do we fix up double white spaces in driver names? */
+  $fixDblWhiteSpace = isset($_POST['rmDoubleWhiteSpace']);
+  
   $eventDate = ltrim($html->find('.clearfix H5', 0)
       ->plaintext);
-    $raceClasses = array();
+  
+  $raceClasses = array();
 
   /* Web page we are scraping from holds all the classes and
   the results for a given race event in one table, so we
   find that table and interate over each class in the tabs */
   foreach ($html->find('table') as $element) {
     $rc = new RaceClass($element->find('.class_header', 0)
-        ->plaintext);
+        ->plaintext, $eventDate);
 
-      $tbody = $element->find('tbody', 0);
+    /* Set the fix on or off depending on the users needs */
+    $rc->dblWhiteSpaceFixToggle($fixDblWhiteSpace);
+
+    $tbody = $element->find('tbody', 0);
 
     $points = (int) $pointsThird;
-
+    RaceDebug::debug(0, 'Event: ' . $eventDate . ', class: ' . $rc->name());
     foreach ($tbody->find('tr') as $entry) {
       RaceDebug::debug(0, 'e = column entry, ' . $entry);
       /* Get the place the driver came, and their name */
@@ -118,14 +147,14 @@ function parseLinkForClasses($html)
                seems to be the person that came first in the
                results, so i guess that's easy
             */
-            $rc->add($eventDate, $driverName, $pointsFirst + 1);
+            $rc->add($driverName, $pointsFirst + 1);
           } else {
-            $rc->add($eventDate, $driverName, $pointsFirst);
+            $rc->add($driverName, $pointsFirst);
           }
         } else if ($place == 2) {
-          $rc->add($eventDate, $driverName, $pointsSecond);
+          $rc->add($driverName, $pointsSecond);
         } else {
-          $rc->add($eventDate, $driverName, $points);
+          $rc->add($driverName, $points);
           $points -= 1;
           /* Protection here, if we have more drivers than points,
              then those drivers will just get 0
@@ -135,9 +164,8 @@ function parseLinkForClasses($html)
         }
       }
     }
-    array_push($raceClasses, $rc);
+    $raceClasses[] = $rc;
   }
-
   return $raceClasses;
 }
 
@@ -194,7 +222,7 @@ foreach ($webLinks as $link) {
 
   RaceDebug::debug(0, "Fetching page from $link");
 }
-
+  
 $result = array();
 foreach ($html_pages as $page) {
   $event = parseLinkForClasses($page);
@@ -202,8 +230,7 @@ foreach ($html_pages as $page) {
     if (!array_key_exists($race->name(), $result)) {
       $result[$race->name()] = $race;
     } else {
-      $result[$race->name()]
-        ->update($race);
+      $result[$race->name()]->update($race);
     }
   }
 }
