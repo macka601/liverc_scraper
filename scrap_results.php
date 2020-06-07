@@ -235,6 +235,11 @@ foreach ($html_pages as $page) {
   }
 }
 
+function sortResults($a, $b) 
+{
+  return ($a['result']["total"] >= $b['result']["total"]) ? -1 : 1;
+}
+
 /* Iterate over all the results from the different
    classes and print them out in a pretty table.
    */
@@ -255,12 +260,22 @@ foreach ($result as $class) {
   echo "<th>Total</th>";
   echo "</tr>";
 
-  foreach ($class->getAllDrivers() as $d => $name) {
+  $seasonResults = array();
+
+  foreach ($class->getAllDrivers() as $driver => $name) {
+    $result = $class->getDriverResults($name);
+    $driverResult = array('name' => $name, 'result' => $result);
+    array_push($seasonResults, $driverResult);
+  }
+
+  /* Sort through the totals to produce a sorted table */
+  uasort($seasonResults, "sortResults");
+
+  foreach ($seasonResults as $key => $value) {
     echo "<tr>";
-    $r = $class->getDriverResults($name);
-    echo "<td>$name</td>";
-    foreach ($r as $race => $result) {
-      echo "<td>$result</td>";
+    echo "<td>" . $value['name'] . "</td>";
+    foreach ($value['result'] as $driver => $point) {
+      echo "<td>$point</td>";
     }
     echo "</tr>";
   }
