@@ -10,6 +10,7 @@
 	<script type="text/javascript">
 	var index = 1;
 	</script>
+  <script type="text/javascript" src="../js/scraper.js"></script>
 	<body>
 		<div class="container">
 			<div class="row">
@@ -115,15 +116,3 @@
 	</body>
 </link>
 </html>
-<script type="text/javascript">
-function fetchEvents() {
-			var xmlhttp = new XMLHttpRequest();
-			xmlhttp.onreadystatechange = function() {
-				if (this.readyState == 4 && this.status == 200) {
-					document.getElementById("events").innerHTML = this.responseText;
-				}
-			};
-			xmlhttp.open("GET", "getEvents.php?url=" + document.getElementById('resultsPage').value, true);
-			xmlhttp.send();
-	};
-</script>
