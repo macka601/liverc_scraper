@@ -35,6 +35,8 @@ class RaceClass
   private function fixDoubleWhiteSpace ($name) {
     if ($this->fixDblWhiteSpace) {
       return preg_replace('/\s\s+/', ' ', $name);
+    } else {
+      return $name;
     }
   }
 
