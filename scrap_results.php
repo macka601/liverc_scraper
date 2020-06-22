@@ -34,7 +34,7 @@ class RaceClass
 
   private function fixDoubleWhiteSpace ($name) {
     if ($this->fixDblWhiteSpace) {
-      return preg_replace('/\s\s+/', ' ', $name);
+      return preg_replace('/\s+/', ' ', $name);
     } else {
       return $name;
     }
@@ -90,16 +90,17 @@ class RaceClass
 
   public function getNumberOfEvents()
   {
-    return sizeof($this->events);
+    return count($this->events);
   }
 
   public function getAllDrivers()
   { 
     $allDrivers = array();
     foreach ($this->events as $event => $driversInTheEvent) {
-      foreach ($driversInTheEvent as $driver => $name) {
-        if (!in_array($driver, $allDrivers)) {
-          $allDrivers[$name] = $driver;
+      foreach ($driversInTheEvent as $driver => $points) {
+          // echo "<br>$driver, $name";
+          if (!in_array($driver, $allDrivers)) {
+            $allDrivers[$driver] = $points;
         }
       }
     }
@@ -264,9 +265,9 @@ foreach ($result as $class) {
 
   $seasonResults = array();
 
-  foreach ($class->getAllDrivers() as $driver => $name) {
-    $result = $class->getDriverResults($name);
-    $driverResult = array('name' => $name, 'result' => $result);
+  foreach ($class->getAllDrivers() as $driver => $points) {
+    $result = $class->getDriverResults($driver);
+    $driverResult = array('name' => $driver, 'result' => $result);
     array_push($seasonResults, $driverResult);
   }
 
