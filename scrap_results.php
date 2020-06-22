@@ -198,7 +198,7 @@ foreach ($_POST['event'] as $event => $value) {
 
     foreach ($html->find('a.block') as $a) {
       if (strpos($a, "view_points")) {
-        $webLinks[] = $_POST['resultsPage'] . $a->href;
+        array_unshift($webLinks, $_POST['resultsPage'] . $a->href);
       }
     }
   }
