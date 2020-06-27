@@ -141,8 +141,8 @@ function parseLinkForClasses($html)
       RaceDebug::debug(0, 'e = column entry, ' . $entry);
       /* Get the place the driver came, and their name */
       $place      = (int) $entry->find('td', 0)->innertext;
-      $driverName = $entry->find('td', 1)->plaintext;
-
+      $driverName = $entry->find('td', 3)->plaintext;
+      RaceDebug::debug(0, "driver: $driverName, place: $place");
       if (is_numeric($place)) {
         if ($place == 1) {
           if ($topQualifier) {
@@ -198,7 +198,7 @@ foreach ($_POST['event'] as $event => $value) {
     $html        = file_get_html($html_string);
 
     foreach ($html->find('a.block') as $a) {
-      if (strpos($a, "view_points")) {
+      if (strpos($a, "event_overall_ranking")) {
         array_unshift($webLinks, $_POST['resultsPage'] . $a->href);
       }
     }
